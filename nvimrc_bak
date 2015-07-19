@@ -1,0 +1,238 @@
+" Heavily based on https://github.com/dougblack/dotfiles/blob/master/.vimrc
+" ... And then heavily modified by me to work for NeoVim
+
+" don't bother with vi compatibility
+set nocompatible
+
+let g:python_host_prog = '/usr/local/bin/python'
+
+syntax enable   "enable syntax highlighting
+syntax on
+
+" filetype off
+filetype on
+
+" Colors {{{
+" se t_Co=16
+" let g:solarized_termcolors=256
+let g:solarized_visibility = "high"
+let g:solarized_contrast = "high"
+set background=dark
+colorscheme Solarized
+" }}}
+
+" Miscellaneous {{{
+set ttyfast
+set backspace=indent,eol,start
+" }}}
+
+" Spaces & Tabs {{{
+set tabstop=4       " 4 space tab
+set expandtab       " use spaces for tabs
+set softtabstop=4   " 4 space tab
+set shiftwidth=4
+set modelines=1
+filetype indent on
+filetype plugin on
+set omnifunc=syntaxcomplete#Complete
+autocmd FileType python set omnifunc=pythoncomplete#Complete
+autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
+autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+set autoindent
+set breakindent     " Breaks wrapped text into its proper indent
+set showbreak=\ \ "Adds space after break
+set wrap            " Wrap lines
+set ai              " Auto indent
+set si              " Smart indent
+set tw=72
+set fo=cqt
+set wm=0   " Sets text wrap to 72nd column - taken from http://blog.ezyang.com/2010/03/vim-textwidth/
+" }}}
+
+" UI Layout {{{
+set number        " show line numbers
+set showcmd       " show command in bottom bar
+set nocursorline  " highlight current line
+set wildmenu      " show a navigable menu for tab completion
+set showmatch     " highlight matching parenthesis
+" }}}
+
+" Searching {{{
+set ignorecase    " ignore case when searching
+set incsearch     " search as characters are entered
+set hlsearch      " highlight all matches
+" }}}
+
+" Folding {{{
+"=== folding ===
+set foldmethod=indent   " fold based on indent level
+set foldnestmax=10      " max 10 depth
+set foldenable          " don't fold files by default on open
+nnoremap <space> za
+set foldlevelstart=10   " start with fold level of 1
+" }}}
+
+" Line Shortcuts {{{
+" See https://github.com/dougblack/dotfiles/blob/master/.vimrc for full list
+let mapleader = ','
+noremap <C-h> <C-w>h
+noremap <C-j> <C-w>j
+noremap <C-k> <C-w>k
+noremap <C-l> <C-w>l
+noremap <leader>l :Align
+nnoremap <leader>a :Ag<space>
+nnoremap <leader>b :CtrlPBuffer<CR>
+nnoremap <leader>d :NERDTreeToggle<CR>
+nnoremap <leader>f :NERDTreeFind<CR>
+nnoremap <leader>t :CtrlP<CR>
+nnoremap <leader>T :CtrlPClearCache<CR>:CtrlP<CR>
+nnoremap <leader>] :TagbarToggle<CR>
+nnoremap <leader><space> :call whitespace#strip_trailing()<CR>
+nnoremap <leader>g :GitGutterToggle<CR>
+nnoremap <leader>c <Plug>Kwbd
+noremap <silent> <leader>V :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
+inoremap jj <Esc>
+tnoremap jj <C-\><C-n>
+" }}}
+
+
+set autoread                                                 " reload files when changed on disk, i.e. via `git checkout`
+set backspace=2                                              " Fix broken backspace in some setups
+set backupcopy=yes                                           " see :help crontab
+set clipboard=unnamed                                        " yank and paste with the system clipboard
+set directory-=.                                             " don't store swapfiles in the current directory
+set encoding=utf-8
+set laststatus=2                                             " always show statusline
+set list                                                     " show trailing whitespace
+set listchars=tab:▸\ ,trail:▫
+set ruler                                                    " show where you are
+set scrolloff=3                                              " show context above/below cursorline
+set shiftwidth=2                                             " normal mode indentation commands use 2 spaces
+set smartcase                                                " case-sensitive search if any caps
+set wildignore=log/**,node_modules/**,target/**,tmp/**,*.rbc
+set wildmode=longest,list,full
+
+" Enable basic mouse behavior such as resizing buffers.
+set mouse=a
+
+" in case you forgot to sudo
+cnoremap w!! %!sudo tee > /dev/null %
+
+" plugin settings
+let g:ctrlp_match_window = 'order:ttb,max:20'
+let g:NERDSpaceDelims=1
+let g:gitgutter_enabled = 1
+
+" Use The Silver Searcher https://github.com/ggreer/the_silver_searcher
+if executable('ag')
+  " Use Ag over Grep
+  set grepprg=ag\ --nogroup\ --nocolor
+
+  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+endif
+
+" fdoc is yaml
+autocmd BufRead,BufNewFile *.fdoc set filetype=yaml
+" md is markdown
+autocmd BufRead,BufNewFile *.md set filetype=markdown
+autocmd BufRead,BufNewFile *.md set spell
+" extra rails.vim help
+autocmd User Rails silent! Rnavcommand decorator      app/decorators            -glob=**/* -suffix=_decorator.rb
+autocmd User Rails silent! Rnavcommand observer       app/observers             -glob=**/* -suffix=_observer.rb
+autocmd User Rails silent! Rnavcommand feature        features                  -glob=**/* -suffix=.feature
+autocmd User Rails silent! Rnavcommand job            app/jobs                  -glob=**/* -suffix=_job.rb
+autocmd User Rails silent! Rnavcommand mediator       app/mediators             -glob=**/* -suffix=_mediator.rb
+autocmd User Rails silent! Rnavcommand stepdefinition features/step_definitions -glob=**/* -suffix=_steps.rb
+" automatically rebalance windows on vim resize
+autocmd VimResized * :wincmd =
+
+" Don't copy the contents of an overwritten selection.
+vnoremap p "_dP
+
+" Go crazy!
+if filereadable(expand("~/.nvimrc.local"))
+  " In your .vimrc.local, you might like:
+  "
+  set autowrite
+  " set nocursorline
+  set nowritebackup
+  " set whichwrap+=<,>,h,l,[,] " Wrap arrow keys between lines
+  "
+  " autocmd! bufwritepost .vimrc source ~/.vimrc
+  " noremap! jj <ESC>
+  source ~/.nvimrc.local
+endif
+
+" # Vim Plugins
+
+" configure Plug
+" filetype on " without this vim emits a zero exit status, later, because of :ft off
+" filetype off
+call plug#begin('~/.nvim/plugged')
+" ensure ftdetect et al work by including this after the Vundle stuff
+filetype plugin indent on
+
+Plug 'altercation/vim-colors-solarized'
+Plug 'scrooloose/nerdtree'
+Plug 'hail2u/vim-css3-syntax'
+Plug 'groenewege/vim-less'
+Plug 'jiangmiao/auto-pairs'
+Plug 'bling/vim-airline'
+Plug 'ryanoasis/vim-webdevicons'
+Plug 'flazz/vim-colorschemes'
+Plug 'benekastah/neomake'
+Plug 'mattn/emmet-vim'
+Plug 'othree/html5.vim'
+Plug 'othree/html5-syntax.vim'
+Plug 'pangloss/vim-javascript'
+Plug 'mhinz/vim-startify'
+
+call plug#end()
+
+" Airline Settings {{{
+let g:airline_powerline_fonts = 1
+" }}}
+
+
+" Javascript Settings {{{
+let g:javascript_enable_domhtmlcss = 0
+let b:javascript_fold = 1
+" }}}
+
+" Indent Guides Settings {{{
+let g:indent_guides_auto_colors = 0
+autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=gray   ctermbg=3
+autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green ctermbg=4
+" }}}
+" Emmet Settings {{{
+let g:user_emmet_expandabbr_key='<Tab>'
+" }}}
+
+
+
+" WebDevIcons Settings {{{
+let g:webdevicons_enable = 1
+let g:webdevicons_enable_nerdtree = 1
+let g:webdevicons_enable_airline_tabline = 1
+let g:webdevicons_enable_airline_statusline = 1
+let g:WebDevIconsUnicodeDecorateFileNodes = 0
+let g:WebDevIconsUnicodeGlyphDoubleWidth = 1
+let g:webdevicons_conceal_nerdtree_brackets = 1
+let g:WebDevIconsNerdTreeAfterGlyphPadding = ' '
+" }}}
+
+" {{{NERDTREE Settings}}}
+let NERDTreeShowHidden=1
+let NERDtreeMinimalUI=1
+
+" TMux Settings {{{
+"tmux set-option -g utf8 on
+:set tenc=utf8
+" }}}
+
+" Startify Settings {{{
+let g:startify_session_dir = '~/.nvim/sessions'
+let g:startify_list_order = ['sessions', 'files', 'dir', 'bookmarks', ]
+" }}}
