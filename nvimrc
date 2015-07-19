@@ -1,73 +1,520 @@
-" Heavily based on https://github.com/dougblack/dotfiles/blob/master/.vimrc
-" ... And then heavily modified by me to work for NeoVim
-"
-" don't bother with vi compatibility
-set nocompatible
-" Colors {{{
-syntax enable   " enable syntax highlighting
-" filetype off
+"*****************************************************************************
+"" NeoBundle core
+"*****************************************************************************
 
-" configure Plug
-filetype on " without this vim emits a zero exit status, later, because of :ft off
-filetype off
-call plug#begin('~/.nvim/plugged')
-" ensure ftdetect et al work by including this after the Vundle stuff
+if has('vim_starting')
+  set nocompatible               " Be iMproved
+
+  " Required:
+  set runtimepath+=~/.nvim/bundle/neobundle.vim/
+endif
+
+let neobundle_readme=expand('~/.nvim/bundle/neobundle.vim/README.md')
+
+if !filereadable(neobundle_readme)
+  echo "Installing NeoBundle..."
+  echo ""
+  silent !mkdir -p ~/.nvim/bundle
+  silent !git clone https://github.com/Shougo/neobundle.vim ~/.nvim/bundle/neobundle.vim/
+  let g:not_finsh_neobundle = "yes"
+
+  " Run shell script if exist on custom select language
+  silent !\curl -sSL https://raw.githubusercontent.com/avelino/vim-bootstrap/master/vim_template/langs/javascript/javascript.sh | bash -s stable
+  silent !\curl -sSL https://raw.githubusercontent.com/avelino/vim-bootstrap/master/vim_template/langs/html/html.sh | bash -s stable
+endif
+
+" Required:
+call neobundle#begin(expand('~/.nvim/bundle/'))
+
+" Let NeoBundle manage NeoBundle
+" Required:
+NeoBundleFetch 'Shougo/neobundle.vim'
+
+"*****************************************************************************
+"" NeoBundle install packages
+"*****************************************************************************
+NeoBundle 'marijnh/tern_for_vim'
+NeoBundle 'Slava/tern-meteor'
+NeoBundle 'scrooloose/nerdtree'
+NeoBundle 'tpope/vim-commentary'
+NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'ctrlpvim/ctrlp.vim'
+NeoBundle 'bling/vim-airline'
+NeoBundle 'airblade/vim-gitgutter'
+" NeoBundle 'sheerun/vim-polyglot'
+NeoBundle 'vim-scripts/grep.vim'
+NeoBundle 'vim-scripts/CSApprox'
+NeoBundle 'bronson/vim-trailing-whitespace'
+NeoBundle 'Shougo/vimproc.vim', {
+      \ 'build' : {
+      \     'windows' : 'tools\\update-dll-mingw',
+      \     'cygwin' : 'make -f make_cygwin.mak',
+      \     'mac' : 'make -f make_mac.mak',
+      \     'unix' : 'make -f make_unix.mak',
+      \    },
+      \ }
+" if v:version > 702
+" 	NeoBundle 'Shougo/vimshell.vim'
+" endif
+
+"" Vim-Session
+NeoBundle 'xolox/vim-misc'
+NeoBundle 'xolox/vim-session'
+
+"" Snippets
+" NeoBundle 'SirVer/ultisnips'
+" NeoBundle 'honza/vim-snippets'
+
+"" Color
+NeoBundle 'tomasr/molokai'
+NeoBundle 'altercation/vim-colors-solarized'
+NeoBundle 'Lokaltog/vim-distinguished'
+NeoBundle 'flazz/vim-colorschemes'
+NeoBundle 'cocopon/iceberg.vim'
+
+"" Vim-Bootstrap Updater
+NeoBundle 'sherzberg/vim-bootstrap-updater'
+
+let g:vim_bootstrap_langs = "javascript,html"
+let g:vim_bootstrap_editor = "nvim"				" nvim or vim
+
+"" Custom bundles
+
+"" Javascript Bundle
+NeoBundle 'scrooloose/syntastic'
+NeoBundle 'pangloss/vim-Javascript'
+NeoBundle 'maksimr/vim-jsbeautify'
+
+
+"" HTML Bundle
+NeoBundle 'amirh/HTML-AutoCloseTag'
+NeoBundle 'hail2u/vim-css3-syntax'
+NeoBundle 'gorodinskiy/vim-coloresque'
+NeoBundle 'tpope/vim-haml'
+NeoBundle 'mattn/emmet-vim'
+NeoBundle 'jiangmiao/auto-pairs'
+NeoBundle 'gregsexton/MatchTag'
+
+"" Indent Lines
+NeoBundle 'Yggdroot/indentline'
+let g:indentLine_color_term = 239
+let g:indentLine_color_gui = '#A4E57E'
+" let g:indentLine_char = '︙'
+let g:indentLine_char = '|'
+
+"" YouCompleteMe Bundle
+NeoBundle 'Valloric/YouCompleteMe', {
+     \ 'build'      : {
+        \ 'mac'     : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+        \ 'unix'    : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+        \ 'windows' : './install.sh --clang-completer --system-libclang --omnisharp-completer',
+        \ 'cygwin'  : './install.sh --clang-completer --system-libclang --omnisharp-completer'
+        \ }
+     \ }
+
+"" NERDTree Icons Bundle
+NeoBundle 'ryanoasis/vim-webdevicons'
+
+"" Vim Misc Bundle
+NeoBundle 'xolox/vim-misc'
+
+"" Vim Sessions Bundle
+NeoBundle 'xolox/vim-session'
+
+"" Include user's extra bundle
+if filereadable(expand("~/.nvimrc.local.bundles"))
+  source ~/.nvimrc.local.bundles
+endif
+
+call neobundle#end()
+
+" Required:
 filetype plugin indent on
 
-filetype on
-" set t_Co=256
-" set term=screen-256color
-" }}}
+" If there are uninstalled bundles found on startup,
+" this will conveniently prompt you to install them.
+NeoBundleCheck
 
-" Miscellaneous {{{
-set ttyfast
+"*****************************************************************************
+"" Basic Setup
+"*****************************************************************************"
+"" Encoding
+set encoding=utf-8
+set fileencoding=utf-8
+set fileencodings=utf-8
+
+"" Fix backspace indent
 set backspace=indent,eol,start
-" }}}
 
-" Spaces & Tabs {{{
-set tabstop=4       " 4 space tab
-set expandtab       " use spaces for tabs
-set softtabstop=4   " 4 space tab
+"" Tabs. May be overriten by autocmd rules
+set tabstop=4
+set softtabstop=4
 set shiftwidth=4
-set modelines=1
-filetype indent on
-filetype plugin on
-set autoindent
-set breakindent     " Breaks wrapped text into its proper indent
-set showbreak=\ \ "Adds space after break
-set wrap            " Wrap lines
-set ai              " Auto indent
-set si              " Smart indent
-set tw=72
-set fo=cqt
-set wm=0   " Sets text wrap to 72nd column - taken from http://blog.ezyang.com/2010/03/vim-textwidth/
-" }}}
+set expandtab
 
-" UI Layout {{{
-set number        " show line numbers
-set showcmd       " show command in bottom bar
-set nocursorline  " highlight current line
-set wildmenu      " show a navigable menu for tab completion
-set showmatch     " highlight matching parenthesis
-" }}}
+"" Map leader to ,
+let mapleader=','
 
-" Searching {{{
-set ignorecase    " ignore case when searching
-set incsearch     " search as characters are entered
-set hlsearch      " highlight all matches
-" }}}
+"" Enable hidden buffers
+set hidden
 
-" Folding {{{
-"=== folding ===
-set foldmethod=indent   " fold based on indent level
-set foldnestmax=10      " max 10 depth
-set foldenable          " don't fold files by default on open
-nnoremap <space> za
-set foldlevelstart=10   " start with fold level of 1
-" }}}
+"" Searching
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
 
-" Line Shortcuts {{{
-" See https://github.com/dougblack/dotfiles/blob/master/.vimrc for full list
+"" Encoding
+set bomb
+set binary
+
+
+"" Directories for swp files
+set nobackup
+set noswapfile
+
+set fileformats=unix,dos,mac
+set showcmd
+" shell=/usr/bin/zsh
+
+" session management
+let g:session_directory = "~/.nvim/sessions"
+let g:session_autoload = "no"
+let g:session_autosave = "no"
+let g:session_command_aliases = 1
+
+"*****************************************************************************
+"" Visual Settings
+"*****************************************************************************
+syntax on
+set ruler
+set number
+
+let no_buffers_menu=1
+if !exists('g:not_finsh_neobundle')
+  colorscheme molokai
+endif
+
+set mousemodel=popup
+set t_Co=256
+set nocursorline
+set guioptions=egmrti
+set gfn=Monospace\ 10
+
+if has("gui_running")
+  if has("gui_mac") || has("gui_macvim")
+    set guifont=Menlo:h12
+    set transparency=7
+  endif
+else
+  let g:CSApprox_loaded = 1
+
+  if $COLORTERM == 'gnome-terminal'
+    set term=gnome-256color
+  else
+    if $TERM == 'xterm'
+      set term=xterm-256color
+    endif
+  endif
+endif
+
+if &term =~ '256color'
+  set t_ut=
+endif
+
+"" Disable the blinking cursor.
+set gcr=a:blinkon0
+set scrolloff=3
+
+"" Status bar
+set laststatus=2
+
+"" Use modeline overrides
+set modeline
+set modelines=10
+
+set title
+set titleold="Terminal"
+set titlestring=%F
+
+set statusline=%F%m%r%h%w%=(%{&ff}/%Y)\ (line\ %l\/%L,\ col\ %c)\
+
+if exists("*fugitive#statusline")
+  set statusline+=%{fugitive#statusline()}
+endif
+
+" vim-airline
+let g:airline_theme = 'powerlineish'
+let g:airline#extensions#syntastic#enabled = 1
+let g:airline#extensions#branch#enabled = 1
+let g:airline#extensions#tabline#enabled = 1
+
+if !exists('g:airline_symbols')
+	let g:airline_symbols = {}
+endif
+
+let g:airline_powerline_fonts = 1
+
+if !exists('g:airline_powerline_fonts')
+  let g:airline#extensions#tabline#left_sep = ' '
+  let g:airline#extensions#tabline#left_alt_sep = '|'
+else
+  let g:airline#extensions#tabline#left_sep = ''
+  let g:airline#extensions#tabline#left_alt_sep = ''
+
+  " powerline symbols
+  let g:airline_left_sep = ''
+  let g:airline_left_alt_sep = ''
+  let g:airline_right_sep = ''
+  let g:airline_right_alt_sep = ''
+  let g:airline_symbols.branch = ''
+  let g:airline_symbols.readonly = ''
+  let g:airline_symbols.linenr = ''
+endif
+"*****************************************************************************
+"" Abbreviations
+"*****************************************************************************
+"" no one is really happy until you have this shortcuts
+cnoreabbrev W! w!
+cnoreabbrev Q! q!
+cnoreabbrev Qall! qall!
+cnoreabbrev Wq wq
+cnoreabbrev Wa wa
+cnoreabbrev wQ wq
+cnoreabbrev WQ wq
+cnoreabbrev W w
+cnoreabbrev Q q
+cnoreabbrev Qall qall
+
+"" NERDTree configuration
+let g:NERDTreeChDirMode=2
+let g:NERDTreeIgnore=['\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
+let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
+let g:NERDTreeShowBookmarks=1
+let g:nerdtree_tabs_focus_on_files=1
+let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
+let g:NERDTreeWinSize = 20
+let NERDTreeShowHidden=1
+let NERDTreeMinimalUI=1
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.db,*.sqlite
+nnoremap <silent> <F2> :NERDTreeFind<CR>
+noremap <F3> :NERDTreeToggle<CR>
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+
+"" WebDevIcons Settings
+let g:webdevicons_enable = 1
+let g:webdevicons_enable_nerdtree = 1
+let g:webdevicons_enable_airline_tabline = 1
+let g:webdevicons_enable_airline_statusline = 1
+let g:WebDevIconsUnicodeDecorateFileNodes = 0
+let g:WebDevIconsUnicodeGlyphDoubleWidth = 1
+let g:webdevicons_conceal_nerdtree_brackets = 1
+let g:WebDevIconsNerdTreeAfterGlyphPadding = ' '
+
+" grep.vim
+nnoremap <silent> <leader>f :Rgrep<CR>
+let Grep_Default_Options = '-IR'
+
+" vimshell.vim
+let g:vimshell_user_prompt = 'fnamemodify(getcwd(), ":~")'
+let g:vimshell_prompt =  '$ '
+
+" terminal emulation
+if g:vim_bootstrap_editor == 'nvim'
+  nnoremap <silent> <leader>sh :terminal<CR>
+else
+  nnoremap <silent> <leader>sh :VimShellCreate<CR>
+endif
+
+"*****************************************************************************
+"" Functions
+"*****************************************************************************
+if !exists('*s:setupWrapping')
+  function s:setupWrapping()
+    set wrap
+    set wm=2
+    set textwidth=79
+  endfunction
+endif
+
+"*****************************************************************************
+"" Autocmd Rules
+"*****************************************************************************
+"" The PC is fast enough, do syntax highlight syncing from start
+augroup vimrc-sync-fromstart
+  autocmd!
+  autocmd BufEnter * :syntax sync fromstart
+augroup END
+
+"" Remember cursor position
+augroup vimrc-remember-cursor-position
+  autocmd!
+  autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+augroup END
+
+"" txt
+augroup vimrc-wrapping
+  autocmd!
+  autocmd BufRead,BufNewFile *.txt call s:setupWrapping()
+augroup END
+
+"" make/cmake
+augroup vimrc-make-cmake
+  autocmd!
+  autocmd FileType make setlocal noexpandtab
+  autocmd BufNewFile,BufRead CMakeLists.txt setlocal filetype=cmake
+augroup END
+
+set autoread
+
+"*****************************************************************************
+"" Mappings
+"*****************************************************************************
+"" Split
+noremap <Leader>h :<C-u>split<CR>
+noremap <Leader>v :<C-u>vsplit<CR>
+
+"" Git
+noremap <Leader>ga :Gwrite<CR>
+noremap <Leader>gc :Gcommit<CR>
+noremap <Leader>gsh :Gpush<CR>
+noremap <Leader>gll :Gpull<CR>
+noremap <Leader>gs :Gstatus<CR>
+noremap <Leader>gb :Gblame<CR>
+noremap <Leader>gd :Gvdiff<CR>
+noremap <Leader>gr :Gremove<CR>
+
+" session management
+nnoremap <leader>so :OpenSession
+nnoremap <leader>ss :SaveSession
+nnoremap <leader>sd :DeleteSession<CR>
+nnoremap <leader>sc :CloseSession<CR>
+
+"" Tabs
+nnoremap <Tab> gt
+nnoremap <S-Tab> gT
+nnoremap <silent> <S-t> :tabnew<CR>
+
+"" Set working directory
+nnoremap <leader>. :lcd %:p:h<CR>
+
+"" Opens an edit command with the path of the currently edited file filled in
+noremap <Leader>e :e <C-R>=expand("%:p:h") . "/" <CR>
+
+"" Opens a tab edit command with the path of the currently edited file filled
+noremap <Leader>te :tabe <C-R>=expand("%:p:h") . "/" <CR>
+
+"" ctrlp.vim
+set wildmode=list:longest,list:full
+set wildignore+=*.o,*.obj,.git,*.rbc,*.pyc,__pycache__
+let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn|tox)$'
+let g:ctrlp_user_command = "find %s -type f | grep -Ev '"+ g:ctrlp_custom_ignore +"'"
+let g:ctrlp_use_caching = 0
+cnoremap <C-P> <C-R>=expand("%:p:h") . "/" <CR>
+noremap <leader>b :CtrlPBuffer<CR>
+let g:ctrlp_map = '<leader>e'
+let g:ctrlp_open_new_file = 'r'
+
+" snippets
+" let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets"]
+" let g:UltiSnipsExpandTrigger="<tab>"
+" let g:UltiSnipsJumpForwardTrigger="<tab>"
+" let g:UltiSnipsJumpBackwardTrigger="<c-b>"
+" let g:UltiSnipsEditSplit="vertical"
+
+" syntastic
+
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_html_tidy_exec = 'tidy5'
+let g:syntastic_always_populate_loc_list=1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_error_symbol='✗'
+let g:syntastic_warning_symbol='⚠'
+let g:syntastic_style_error_symbol = '✗'
+let g:syntastic_style_warning_symbol = '⚠'
+let g:syntastic_auto_loc_list=1
+let g:syntastic_aggregate_errors = 1
+
+" Emmet
+" autocmd FileType html,htmldjango,css,scss,sass imap <tab> <plug>(EmmetExpandAbbr)
+" imap <expr> <tab> emmet#expandAbbrIntelligent("\<tab>")
+
+" Huge Functiony thing that makes tabs work
+" Got this from https://github.com/mattn/emmet-vim/issues/168
+function! s:expand_html_tab()
+  " try to determine if we're within quotes or tags.
+  " if so, assume we're in an emmet fill area.
+  let line = getline('.')
+  if col('.') < len(line)
+    let line = matchstr(line, '[">][^<"]*\%'.col('.').'c[^>"]*[<"]')
+
+    if len(line) >= 2
+      return "\<Plug>(emmet-move-next)"
+    endif
+  endif
+
+  " go to next item in a popup menu.
+  if pumvisible()
+    return "\<C-n>"
+  endif
+
+  " expand anything emmet thinks is expandable.
+  " I'm not sure control ever reaches below this block.
+  if emmet#isExpandable()
+    return "\<Plug>(emmet-expand-abbr)"
+  endif
+
+  " return a regular tab character
+  return "\<tab>"
+endfunction
+
+autocmd FileType html imap <buffer><expr><tab> <sid>expand_html_tab()
+
+"" Copy/Paste/Cut
+" if has('unnamedplus')
+ "  set clipboard=unnamed,unnamedplus
+" endif
+
+" noremap YY "+y<CR>
+" noremap P "+gP<CR>
+" noremap XX "+x<CR>
+
+if has('macunix')
+  " pbcopy for OSX copy/paste
+  vmap <C-x> :!pbcopy<CR>
+  vmap <C-c> :w !pbcopy<CR><CR>
+endif
+
+"" Buffer nav
+noremap <leader>z :bp<CR>
+noremap <leader>q :bp<CR>
+noremap <leader>x :bn<CR>
+noremap <leader>w :bn<CR>
+
+"" Close buffer
+noremap <leader>c :bd<CR>
+
+"" Clean search (highlight)
+nnoremap <silent> <leader><space> :noh<cr>
+
+"" Vmap for maintain Visual Mode after shifting > and <
+vmap < <gv
+vmap > >gv
+
+"" Open current line on GitHub
+noremap ,o :!echo `git url`/blob/`git rev-parse --abbrev-ref HEAD`/%\#L<C-R>=line('.')<CR> \| xargs open<CR><CR>
+
+"" Custom configs
+
+let g:javascript_enable_domhtmlcss = 1
+
+let tern#is_show_argument_hints_enabled = 1
+
+"" Custom Mappings
 let mapleader = ','
 noremap <C-h> <C-w>h
 noremap <C-j> <C-w>j
@@ -89,296 +536,7 @@ inoremap jj <Esc>
 tnoremap jj <C-\><C-n>
 " }}}
 
-
-set autoread                                                 " reload files when changed on disk, i.e. via `git checkout`
-set backspace=2                                              " Fix broken backspace in some setups
-set backupcopy=yes                                           " see :help crontab
-set clipboard=unnamed                                        " yank and paste with the system clipboard
-set directory-=.                                             " don't store swapfiles in the current directory
-set encoding=utf-8
-set laststatus=2                                             " always show statusline
-set list                                                     " show trailing whitespace
-set listchars=tab:▸\ ,trail:▫
-set ruler                                                    " show where you are
-set scrolloff=3                                              " show context above/below cursorline
-set shiftwidth=2                                             " normal mode indentation commands use 2 spaces
-set smartcase                                                " case-sensitive search if any caps
-set wildignore=log/**,node_modules/**,target/**,tmp/**,*.rbc
-set wildmode=longest,list,full
-
-" Enable basic mouse behavior such as resizing buffers.
-set mouse=a
-if exists('$TMUX')  " Support resizing in tmux
-  set ttymouse=xterm2
-endif
-
-
-" in case you forgot to sudo
-cnoremap w!! %!sudo tee > /dev/null %
-
-" plugin settings
-let g:ctrlp_match_window = 'order:ttb,max:20'
-let g:NERDSpaceDelims=1
-let g:gitgutter_enabled = 1
-
-" Use The Silver Searcher https://github.com/ggreer/the_silver_searcher
-if executable('ag')
-  " Use Ag over Grep
-  set grepprg=ag\ --nogroup\ --nocolor
-
-  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-endif
-
-" fdoc is yaml
-autocmd BufRead,BufNewFile *.fdoc set filetype=yaml
-" md is markdown
-autocmd BufRead,BufNewFile *.md set filetype=markdown
-autocmd BufRead,BufNewFile *.md set spell
-" extra rails.vim help
-autocmd User Rails silent! Rnavcommand decorator      app/decorators            -glob=**/* -suffix=_decorator.rb
-autocmd User Rails silent! Rnavcommand observer       app/observers             -glob=**/* -suffix=_observer.rb
-autocmd User Rails silent! Rnavcommand feature        features                  -glob=**/* -suffix=.feature
-autocmd User Rails silent! Rnavcommand job            app/jobs                  -glob=**/* -suffix=_job.rb
-autocmd User Rails silent! Rnavcommand mediator       app/mediators             -glob=**/* -suffix=_mediator.rb
-autocmd User Rails silent! Rnavcommand stepdefinition features/step_definitions -glob=**/* -suffix=_steps.rb
-" automatically rebalance windows on vim resize
-autocmd VimResized * :wincmd =
-
-" Automatically assign YCM to Omnicomplete
-let g:tern_map_keys=1
-
-" Fix Cursor in TMUX
-if exists('$TMUX')
-  let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
-  let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
-else
-  let &t_SI = "\<Esc>]50;CursorShape=1\x7"
-  let &t_EI = "\<Esc>]50;CursorShape=0\x7"
-endif
-
-" Don't copy the contents of an overwritten selection.
-vnoremap p "_dP
-
-" Go crazy!
+"" Include user's local vim config
 if filereadable(expand("~/.nvimrc.local"))
-  " In your .vimrc.local, you might like:
-  "
-  set autowrite
-  " set nocursorline
-  set nowritebackup
-  " set whichwrap+=<,>,h,l,[,] " Wrap arrow keys between lines
-  "
-  " autocmd! bufwritepost .vimrc source ~/.vimrc
-  " noremap! jj <ESC>
   source ~/.nvimrc.local
 endif
-" # Vim Plugins
-Plug 'reedes/vim-thematic'
-Plug 'scrooloose/nerdtree'
-Plug 'hail2u/vim-css3-syntax'
-Plug 'groenewege/vim-less'
-Plug 'jiangmiao/auto-pairs'
-Plug 'bling/vim-airline'
-Plug 'ryanoasis/vim-webdevicons'
-Plug 'flazz/vim-colorschemes'
-Plug 'Valloric/YouCompleteMe'
-" Plugin 'rdnetto/YCM-Generator'
-Plug 'marijnh/tern_for_vim'
-Plug 'mattn/emmet-vim'
-Plug 'othree/html5.vim'
-Plug 'othree/html5-syntax.vim'
-" Plugin 'jistr/vim-nerdtree-tabs'
-" Plugin 'godlygeek/csapprox'
-Plug 'mhinz/vim-startify'
-
-" # Authored Bundles
-Plug 'reedes/vim-colors-pencil'
-Plug 'reedes/vim-lexical'
-Plug 'reedes/vim-litecorrect'
-Plug 'reedes/vim-one'
-Plug 'reedes/vim-pencil'
-Plug 'reedes/vim-textobj-quote'
-Plug 'reedes/vim-textobj-sentence'
-Plug 'reedes/vim-wordy'
-
-" # Color Bundles
-Plug 'freeo/vim-kalisi'
-Plug 'baskerville/bubblegum'
-Plug 'chriskempson/base16-vim'
-Plug 'endel/vim-github-colorscheme'
-Plug 'nanotech/jellybeans.vim'
-Plug 'noahfrederick/vim-hemisu'"
-
-call plug#end()
-" Airline Settings {{{
-let g:airline_powerline_fonts = 1
-" }}}
-
-" Thematic Settings {{{
-let g:thematic#defaults = {
-      \ 'airline-theme': 'solarized',
-      \ 'colorscheme': 'solarized',
-      \ 'fullscreen-background-color-fix': 1,
-      \ 'sign-column-color-fix': 1,
-      \ 'laststatus': 2,
-      \ 'background': 'dark',
-      \ 'font-size': 20,
-      \ 'linespace': 0,}
-let g:thematic#themes = {
-      \ 'desert'     : { 'sign-column-color-fix': 1,
-      \                  'columns': 80,
-      \                  'lines': 30,
-      \                  'linespace': 9,
-      \                  'sign-column': 1,
-      \                  'laststatus': 2,
-      \                  'fold-column-color-mute': 1,
-      \                  'number-column-color-mute': 1,
-      \                  'typeface': 'Cutive Mono',
-      \                },
-      \ 'kalisi_dark'   :{'colorscheme': 'kalisi',
-      \                  'background': 'dark',
-      \                  'columns' : 80,
-      \                  'lines' : 30,
-      \                  'linespace': 9,
-      \                  'sign-column': 1,
-      \                  'laststatus': 2,
-      \                  'fold-column-color-mute': 1,
-      \                  'airline-theme': 'kalisi',
-      \               },
-      \ 'kalisi_light'  :{ 'colorscheme': 'kalisi',
-      \                  'background': 'light',
-      \                  'columns' : 80,
-      \                  'lines' : 30,
-      \                  'linespace': 9,
-      \                  'sign-column': 1,
-      \                  'laststatus': 2,
-      \                  'fold-column-color-mute': 1,
-      \                  'airline-theme': 'kalisi',
-      \               },
-      \ 'pencil_light':{ 'colorscheme': 'pencil',
-      \                  'background': 'light',
-      \                  'columns': 75,
-      \                  'font-size': 20,
-      \                  'fullscreen': 1,
-      \                  'laststatus': 2,
-      \                  'linespace': 8,
-      \                  'airline-theme': 'light',
-      \                  'typeface': 'Cousine',
-      \                },
-      \ 'pencil_dark': { 'colorscheme': 'pencil',
-      \                  'background': 'dark',
-      \                  'font-size': 20,
-      \                  'fullscreen': 1,
-      \                  'laststatus': 2,
-      \                  'linespace': 8,
-      \                  'airline-theme': 'badwolf',
-      \                  'typeface': 'Cousine',
-      \                },
-      \ 'traditional': { 'colorscheme': 'pencil',
-      \                  'background': 'light',
-      \                  'font-size': 20,
-      \                  'laststatus': 2,
-      \                  'linespace': 8,
-      \                  'typeface': 'Linux Libertine Mono O',
-      \                },
-      \ 'hemi_dark'  : { 'colorscheme': 'hemisu',
-      \                  'font-size': 8,
-      \                  'linespace': 0,
-      \                  'typeface': 'Menlo',
-      \                  'laststatus': 2,
-      \                },
-      \ 'hemi_lite'  : { 'colorscheme': 'hemisu',
-      \                  'background': 'light',
-      \                  'columns': 75,
-      \                  'laststatus': 2,
-      \                  'typeface': 'Fantasque Sans Mono',
-      \                },
-      \ 'matrix'     : { 'colorscheme': 'base16-greenscreen',
-      \                  'font-size': 24,
-      \                  'linespace': 9,
-      \                  'typeface': 'Dot Matrix',
-      \                  'laststatus': 2,
-      \                },
-      \ 'solar_dark' : { 'colorscheme': 'solarized',
-      \                  'diff-color-fix': 1,
-      \                  'sign-column': 1,
-      \                  'sign-column-color-fix': 1,
-      \                  'typeface': 'Source Code Pro Light',
-      \                  'laststatus': 2,
-      \                },
-      \ 'solar_lite' : { 'colorscheme': 'solarized',
-      \                  'background': 'light',
-      \                  'font-size': 20,
-      \                  'sign-column-color-fix': 1,
-      \                  'typeface': 'Source Code Pro Medium',
-      \                  'laststatus': 2,
-      \                },
-      \ 'embers' :     { 'colorscheme': 'base16-embers',
-      \                  'diff-color-fix': 1,
-      \                  'sign-column': 1,
-      \                  'sign-column-color-fix': 1,
-      \                  'typeface': 'Source Code Pro Light',
-      \                  'laststatus': 2,
-      \                  'airline-theme': 'base16-embers',
-      \                },
-      \ 'jellybeans' : { 'colorscheme': 'jellybeans',
-      \                  'background': 'light',
-      \                  'ruler': 1,
-      \                  'laststatus': 2,},
-      \ 'github'     : { 'background': 'light'  }}
-
-colorscheme Solarized
-let g:solarized_termcolors=16
-let g:solarized_visibility = "high"
-let g:solarized_contrast = "high"
-set background=dark
-
-" Javascript Settings {{{
-let g:javascript_enable_domhtmlcss = 0
-let b:javascript_fold = 1
-" }}}
-
-" Indent Guides Settings {{{
-let g:indent_guides_auto_colors = 0
-autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=gray   ctermbg=3
-autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=green ctermbg=4
-" }}}
-" Emmet Settings {{{
-let g:user_emmet_expandabbr_key='<Tab>'
-" }}}
-
-" YouCompleteMe Settings {{{
-let g:ycm_global_ycm_extra_conf=expand('~/.nvim/ycm_extra_conf.py')
-let g:ycm_register_as_syntastic_checker = 1
-let g:ycm_seed_identifiers_with_syntax=1
-let g:ycm_collect_identifiers_from_tags_files=1
-" }}}
-" Syntastic Settings {{{
-let g:syntastic_html_tidy_exec = 'tidy5'
-let syntastic_mode_map = { 'passive_filetypes': ['html'] }
-" }}}
-
-" WebDevIcons Settings {{{
-let g:webdevicons_enable = 1
-let g:webdevicons_enable_nerdtree = 1
-let g:webdevicons_enable_airline_tabline = 1
-let g:webdevicons_enable_airline_statusline = 1
-let g:WebDevIconsUnicodeDecorateFileNodes = 0
-let g:WebDevIconsUnicodeGlyphDoubleWidth = 1
-let g:webdevicons_conceal_nerdtree_brackets = 1
-let g:WebDevIconsNerdTreeAfterGlyphPadding = ' '
-" }}}
-
-" {{{NERDTREE Settings}}}
-let NERDTreeShowHidden=1
-
-" TMux Settings {{{
-"tmux set-option -g utf8 on
-:set tenc=utf8
-" }}}
-
-" Startify Settings {{{
-let g:startify_session_dir = '~/.nvim/sessions'
-let g:startify_list_order = ['sessions', 'files', 'dir', 'bookmarks', ]
-" }}}
